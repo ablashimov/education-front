@@ -1,0 +1,6 @@
+.env
+.env.backup
+.env.production
+/node_modules
+/build
+/new design
