@@ -4,7 +4,6 @@ import { LoginPage } from './components/LoginPage';
 import { EmailVerificationPage } from './components/EmailVerificationPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { UserDashboard } from './components/UserDashboard';
-import { TrainingGroupDetail } from './components/TrainingGroupDetail';
 import { ExamView } from './components/user/ExamView';
 import { ExamAttempt } from './components/user/ExamAttempt';
 import { useAuth } from './context/AuthContext';
@@ -63,11 +62,7 @@ export default function App() {
     );
   }
 
-  return (
-    <Router>
-      <AppRoutes user={user} onLogout={logout} />
-    </Router>
-  );
+  return <AppRoutes user={user} onLogout={logout} />;
 }
 
 function AppRoutes({ user, onLogout }: { user: any, onLogout: () => void }) {
