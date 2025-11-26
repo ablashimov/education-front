@@ -1,14 +1,7 @@
 import { apiClient } from '@/lib/api';
 import type { BackendExamAssignment, PaginatedResponse } from '@/types/backend';
 
-function unwrapPaginated<T>(payload: PaginatedResponse<T> | T[] | { data: T[] }): T[] {
-  if (Array.isArray(payload)) return payload;
-  // Some APIs wrap in { data: [] }
-  if (payload && typeof payload === 'object' && 'data' in payload && Array.isArray((payload as any).data)) {
-    return (payload as any).data as T[];
-  }
-  return [];
-}
+
 
 export interface FetchResultsParams {
   page?: number;
@@ -16,6 +9,10 @@ export interface FetchResultsParams {
   all?: boolean;
   filter?: {
     name?: string;
+    global?: string;
+    status?: string;
+    start_date?: string;
+    end_date?: string;
   };
   sort?: string;
 }
@@ -39,6 +36,22 @@ export async function fetchResults(params: FetchResultsParams = {}): Promise<Fet
 
   if (params.filter?.name) {
     queryParams['filter[user.name]'] = params.filter.name;
+  }
+
+  if (params.filter?.global) {
+    queryParams['filter[global]'] = params.filter.global;
+  }
+
+  if (params.filter?.status) {
+    queryParams['filter[resultStatus.slug]'] = params.filter.status;
+  }
+
+  if (params.filter?.start_date) {
+    queryParams['filter[start_date]'] = params.filter.start_date;
+  }
+
+  if (params.filter?.end_date) {
+    queryParams['filter[end_date]'] = params.filter.end_date;
   }
 
   if (params.sort) {

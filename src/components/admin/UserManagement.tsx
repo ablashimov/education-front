@@ -1,18 +1,19 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Skeleton } from '../ui/skeleton';
-import { UserPlus, Trash2, Search, Eye, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { UserPlus, Trash2, Eye, Loader2, Filter } from 'lucide-react';
 import { createUser, deleteUser, fetchUser, fetchUsers } from '@/services/users';
 import type { FetchUsersResult } from '@/services/users';
 import type { BackendUser } from '@/types/backend';
+import { DataTable, type Column } from '../common/DataTable';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 const perPage = 10;
 
@@ -41,18 +42,30 @@ export function UserManagement() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', rank: '' });
 
+  // Filters
+  const [filterEmail, setFilterEmail] = useState('');
+  const [debouncedFilterEmail, setDebouncedFilterEmail] = useState('');
+
   const queryClient = useQueryClient();
-  const usersQueryKey = ['users', page, perPage, debouncedSearchQuery, sortField, sortDirection] as const;
+  const usersQueryKey = ['users', page, perPage, debouncedSearchQuery, debouncedFilterEmail, sortField, sortDirection] as const;
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setPage(1); // Reset to first page when search changes
+      setPage(1);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Debounce filter email
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilterEmail(filterEmail);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [filterEmail]);
 
   const {
     data: usersResponse,
@@ -65,7 +78,10 @@ export function UserManagement() {
     queryFn: () => fetchUsers({
       page,
       perPage,
-      filter: debouncedSearchQuery.trim() ? { name: debouncedSearchQuery.trim() } : undefined,
+      filter: {
+        name: debouncedSearchQuery.trim() || undefined,
+        email: debouncedFilterEmail.trim() || undefined,
+      },
       sort: sortDirection === 'desc' ? `-${sortField}` : sortField,
     }),
     placeholderData: (previousData) => previousData,
@@ -99,7 +115,6 @@ export function UserManagement() {
   });
 
   const users = usersResponse?.users ?? [];
-
   const meta = usersResponse?.meta;
   const totalPages = meta ? Math.max(meta.last_page, 1) : 1;
 
@@ -121,20 +136,72 @@ export function UserManagement() {
     setIsViewDialogOpen(true);
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
+  const handleSort = (field: string) => {
+    const f = field as SortField;
+    if (sortField === f) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setSortField(field);
+      setSortField(f);
       setSortDirection('asc');
     }
-    setPage(1); // Reset to first page when sorting changes
+    setPage(1);
   };
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
-    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
-  };
+  const columns: Column<BackendUser>[] = [
+    { header: "Ім'я", accessorKey: 'name', sortable: true },
+    { header: "Email", accessorKey: 'email', sortable: true },
+    { header: "Роль", cell: (user) => getPrimaryRole(user) },
+    {
+      header: "Статус email",
+      cell: (user) => user.email_verified_at ? <Badge variant="default">Підтверджено</Badge> : <Badge variant="secondary">Очікує підтвердження</Badge>
+    },
+    { header: "Створено", accessorKey: 'created_at', cell: (user) => formatDate(user.created_at), sortable: true },
+    {
+      header: "Дії",
+      cell: (user) => (
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => handleOpenUser(user.id)}>
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteUser(user.id)}
+            disabled={deleteUserMutation.isPending}
+          >
+            {deleteUserMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin text-red-500" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-red-500" />
+            )}
+          </Button>
+        </div>
+      )
+    }
+  ];
+
+  const filters = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Filter className="w-4 h-4" />
+          Фільтри
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input
+              placeholder="Filter by email..."
+              value={filterEmail}
+              onChange={(e) => setFilterEmail(e.target.value)}
+            />
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 
   return (
     <div className="space-y-6">
@@ -227,158 +294,24 @@ export function UserManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Пошук користувачів..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          {isError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
-                Не вдалося завантажити користувачів. {error instanceof Error ? error.message : 'Спробуйте пізніше.'}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="border rounded-lg">
-            {isLoading ? (
-              <div className="space-y-3 p-6">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <div key={index} className="grid grid-cols-5 gap-4">
-                    {Array.from({ length: 5 }).map((__, inner) => (
-                      <Skeleton key={inner} className="h-5 w-full" />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('name')}
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
-                      >
-                        Ім'я
-                        {getSortIcon('name')}
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('email')}
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
-                      >
-                        Email
-                        {getSortIcon('email')}
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('name')}
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
-                      >
-                        Роль
-                        {getSortIcon('name')}
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('email')}
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
-                      >
-                        Статус email
-                        {getSortIcon('email')}
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort('created_at')}
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
-                      >
-                        Створено
-                        {getSortIcon('created_at')}
-                      </Button>
-                    </TableHead>
-                    <TableHead className="w-[140px]">Дії</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{getPrimaryRole(user)}</TableCell>
-                      <TableCell>
-                        {user.email_verified_at ? (
-                          <Badge variant="default">Підтверджено</Badge>
-                        ) : (
-                          <Badge variant="secondary">Очікує підтвердження</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{formatDate(user.created_at)}</TableCell>
-                      <TableCell className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleOpenUser(user.id)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id)}
-                          disabled={deleteUserMutation.isPending}
-                        >
-                          {deleteUserMutation.isPending ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-red-500" />
-                          ) : (
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {!users.length && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                        Користувачів не знайдено.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-
-          <div className="flex justify-between items-center pt-4 text-sm text-muted-foreground">
-            <div>
-              Сторінка {page} з {totalPages}
-              {isFetching && <Loader2 className="ml-2 inline-block h-4 w-4 animate-spin" />}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((prev) => Math.max(prev - 1, 1))}>
-                Попередня
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={meta ? page >= meta.last_page : true}
-                onClick={() => setPage((prev) => (meta ? Math.min(prev + 1, meta.last_page) : prev))}
-              >
-                Наступна
-              </Button>
-            </div>
-          </div>
+          <DataTable
+            columns={columns}
+            data={users}
+            isLoading={isLoading}
+            isError={isError}
+            errorMessage={error instanceof Error ? error.message : undefined}
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            isFetching={isFetching}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Пошук користувачів..."
+            filters={filters}
+          />
         </CardContent>
       </Card>
 

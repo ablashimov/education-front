@@ -20,6 +20,7 @@ export interface FetchUsersParams {
   perPage?: number;
   filter?: {
     name?: string;
+    email?: string;
   };
   sort?: string;
 }
@@ -37,6 +38,10 @@ export async function fetchUsers(params: FetchUsersParams = {}): Promise<FetchUs
 
   if (params.filter?.name) {
     queryParams['filter[name]'] = params.filter.name;
+  }
+
+  if (params.filter?.email) {
+    queryParams['filter[email]'] = params.filter.email;
   }
 
   if (params.sort) {
