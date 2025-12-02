@@ -6,11 +6,15 @@ import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
 
+import { NotificationProvider } from './context/NotificationContext';
+
 createRoot(document.getElementById('root')!).render(
   <Router>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </AuthProvider>
     </QueryClientProvider>
   </Router>,

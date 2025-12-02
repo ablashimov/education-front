@@ -16,6 +16,7 @@ import { ExamResultDetail } from './user/ExamResultDetail';
 import { ExamDetails } from './user/ExamDetails';
 import { LogOut, BookOpen, ClipboardCheck, Trophy, ChevronRight } from 'lucide-react';
 import type { AuthUser } from '@/context/AuthContext';
+import { NotificationBell } from './NotificationBell';
 
 interface UserDashboardProps {
   user: AuthUser;
@@ -36,67 +37,67 @@ type View =
   | { type: 'result-detail'; resultId: number };
 
 export function UserDashboard({ user, onLogout }: UserDashboardProps) {
-   const params = useParams();
-   const navigate = useNavigate();
-   const [activeSection, setActiveSection] = useState<'groups' | 'exams' | 'results'>('groups');
-   const [currentView, setCurrentView] = useState<View>({ type: 'groups' });
+  const params = useParams();
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<'groups' | 'exams' | 'results'>('groups');
+  const [currentView, setCurrentView] = useState<View>({ type: 'groups' });
 
-   // Parse URL params to determine current view
-   useEffect(() => {
-     const { groupId, moduleId, lessonId, examId, attemptId, resultId } = params;
-     const pathname = window.location.pathname;
+  // Parse URL params to determine current view
+  useEffect(() => {
+    const { groupId, moduleId, lessonId, examId, attemptId, resultId } = params;
+    const pathname = window.location.pathname;
 
-     if (resultId) {
-       setActiveSection('results');
-       setCurrentView({ type: 'result-detail', resultId: Number(resultId) });
-     } else if (examId && attemptId) {
-       setActiveSection('exams');
-       setCurrentView({
-         type: 'exam-attempt',
-         assignmentId: Number(examId),
-         attemptId: Number(attemptId),
-         groupId: 0, // Will be determined by ExamAttempt component
-         examInstanceId: Number(attemptId), // Use attemptId as examInstanceId initially
-       });
-     } else if (examId) {
-       setActiveSection('exams');
-       setCurrentView({
-         type: 'exam',
-         assignmentId: Number(examId),
-         groupId: 0, // Will be determined by ExamView component
-       });
-     } else if (groupId && moduleId && lessonId) {
-       setActiveSection('groups');
-       setCurrentView({
-         type: 'lesson',
-         groupId: Number(groupId),
-         moduleId: Number(moduleId),
-         lessonId: Number(lessonId),
-       });
-     } else if (groupId && moduleId) {
-       setActiveSection('groups');
-       setCurrentView({
-         type: 'module',
-         groupId: Number(groupId),
-         moduleId: Number(moduleId),
-       });
-     } else if (groupId) {
-       setActiveSection('groups');
-       setCurrentView({ type: 'group', groupId: Number(groupId) });
-     } else {
-       // Determine section from pathname
-       if (pathname.startsWith('/results')) {
-         setActiveSection('results');
-         setCurrentView({ type: 'results' });
-       } else if (pathname.startsWith('/exams')) {
-         setActiveSection('exams');
-         setCurrentView({ type: 'exams' });
-       } else {
-         setActiveSection('groups');
-         setCurrentView({ type: 'groups' });
-       }
-     }
-   }, [params]);
+    if (resultId) {
+      setActiveSection('results');
+      setCurrentView({ type: 'result-detail', resultId: Number(resultId) });
+    } else if (examId && attemptId) {
+      setActiveSection('exams');
+      setCurrentView({
+        type: 'exam-attempt',
+        assignmentId: Number(examId),
+        attemptId: Number(attemptId),
+        groupId: 0, // Will be determined by ExamAttempt component
+        examInstanceId: Number(attemptId), // Use attemptId as examInstanceId initially
+      });
+    } else if (examId) {
+      setActiveSection('exams');
+      setCurrentView({
+        type: 'exam',
+        assignmentId: Number(examId),
+        groupId: 0, // Will be determined by ExamView component
+      });
+    } else if (groupId && moduleId && lessonId) {
+      setActiveSection('groups');
+      setCurrentView({
+        type: 'lesson',
+        groupId: Number(groupId),
+        moduleId: Number(moduleId),
+        lessonId: Number(lessonId),
+      });
+    } else if (groupId && moduleId) {
+      setActiveSection('groups');
+      setCurrentView({
+        type: 'module',
+        groupId: Number(groupId),
+        moduleId: Number(moduleId),
+      });
+    } else if (groupId) {
+      setActiveSection('groups');
+      setCurrentView({ type: 'group', groupId: Number(groupId) });
+    } else {
+      // Determine section from pathname
+      if (pathname.startsWith('/results')) {
+        setActiveSection('results');
+        setCurrentView({ type: 'results' });
+      } else if (pathname.startsWith('/exams')) {
+        setActiveSection('exams');
+        setCurrentView({ type: 'exams' });
+      } else {
+        setActiveSection('groups');
+        setCurrentView({ type: 'groups' });
+      }
+    }
+  }, [params]);
 
   const renderBreadcrumbs = () => {
     const crumbs: { label: string; path: string }[] = [];
@@ -292,9 +293,8 @@ export function UserDashboard({ user, onLogout }: UserDashboardProps) {
               setActiveSection('groups');
               navigate('/groups');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'groups' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'groups' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <BookOpen className="w-5 h-5" />
             <span>Мої групи навчання</span>
@@ -305,9 +305,8 @@ export function UserDashboard({ user, onLogout }: UserDashboardProps) {
               setActiveSection('exams');
               navigate('/exams');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'exams' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'exams' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <ClipboardCheck className="w-5 h-5" />
             <span>Заплановані екзамени</span>
@@ -318,9 +317,8 @@ export function UserDashboard({ user, onLogout }: UserDashboardProps) {
               setActiveSection('results');
               navigate('/results');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'results' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'results' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <Trophy className="w-5 h-5" />
             <span>Результати</span>
@@ -351,6 +349,11 @@ export function UserDashboard({ user, onLogout }: UserDashboardProps) {
           {renderContent()}
         </div>
       </main>
+
+      {/* Notification Bell - Fixed Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <NotificationBell />
+      </div>
     </div>
   );
 }

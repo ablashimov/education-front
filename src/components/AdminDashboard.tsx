@@ -18,6 +18,7 @@ import { ExamAttempt } from './user/ExamAttempt';
 import { ExamResultDetail } from './user/ExamResultDetail';
 import { LogOut, Users, BookOpen, ClipboardList, User, ChevronDown, ChevronRight } from 'lucide-react';
 import type { AuthUser } from '@/context/AuthContext';
+import { NotificationBell } from './NotificationBell';
 
 interface AdminDashboardProps {
   user: AuthUser;
@@ -40,80 +41,80 @@ type View =
   | { type: 'my-result-detail'; resultId: string };
 
 export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
-   const params = useParams();
-   const navigate = useNavigate();
-   const [activeSection, setActiveSection] = useState<'users' | 'groups' | 'results' | 'my-trainings'>('users');
-   const [currentView, setCurrentView] = useState<View>({ type: 'users' });
-   const [myTrainingsExpanded, setMyTrainingsExpanded] = useState(false);
+  const params = useParams();
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<'users' | 'groups' | 'results' | 'my-trainings'>('users');
+  const [currentView, setCurrentView] = useState<View>({ type: 'users' });
+  const [myTrainingsExpanded, setMyTrainingsExpanded] = useState(false);
 
-   // Parse URL params to determine current view
-   useEffect(() => {
-     const { groupId, moduleId, lessonId, examId, attemptId, resultId } = params;
-     const pathname = window.location.pathname;
+  // Parse URL params to determine current view
+  useEffect(() => {
+    const { groupId, moduleId, lessonId, examId, attemptId, resultId } = params;
+    const pathname = window.location.pathname;
 
-     if (resultId) {
-       setActiveSection('my-trainings');
-       setCurrentView({ type: 'my-result-detail', resultId });
-     } else if (examId && attemptId) {
-       setActiveSection('my-trainings');
-       setCurrentView({
-         type: 'my-exam-attempt',
-         assignmentId: Number(examId),
-         attemptId: Number(attemptId),
-         groupId: 0, // Will be determined by component
-         examInstanceId: 0, // Will be determined by finding the correct instance from attempt data
-       });
-     } else if (examId) {
-       setActiveSection('my-trainings');
-       setCurrentView({
-         type: 'my-exam',
-         assignmentId: Number(examId),
-         groupId: 0, // Will be determined by component
-       });
-     } else if (groupId && moduleId && lessonId) {
-       setActiveSection('my-trainings');
-       setCurrentView({
-         type: 'my-lesson',
-         groupId: Number(groupId),
-         moduleId: Number(moduleId),
-         lessonId: Number(lessonId),
-       });
-     } else if (groupId && moduleId) {
-       setActiveSection('my-trainings');
-       setCurrentView({
-         type: 'my-module',
-         groupId: Number(groupId),
-         moduleId: Number(moduleId),
-       });
-     } else if (groupId && pathname.startsWith('/admins/groups/')) {
-       setActiveSection('groups');
-       setCurrentView({ type: 'group-detail', groupId });
-     } else if (groupId) {
-       setActiveSection('my-trainings');
-       setCurrentView({ type: 'my-group', groupId: Number(groupId) });
-     } else {
-       // Determine section from pathname
-       if (pathname.startsWith('/admins/my-')) {
-         setActiveSection('my-trainings');
-         if (pathname.startsWith('/admins/my-results')) {
-           setCurrentView({ type: 'my-results' });
-         } else if (pathname.startsWith('/admins/my-exams')) {
-           setCurrentView({ type: 'my-exams' });
-         } else {
-           setCurrentView({ type: 'my-groups' });
-         }
-       } else if (pathname.startsWith('/admins/results')) {
-         setActiveSection('results');
-         setCurrentView({ type: 'results' });
-       } else if (pathname.startsWith('/admins/groups')) {
-         setActiveSection('groups');
-         setCurrentView({ type: 'groups' });
-       } else {
-         setActiveSection('users');
-         setCurrentView({ type: 'users' });
-       }
-     }
-   }, [params]);
+    if (resultId) {
+      setActiveSection('my-trainings');
+      setCurrentView({ type: 'my-result-detail', resultId });
+    } else if (examId && attemptId) {
+      setActiveSection('my-trainings');
+      setCurrentView({
+        type: 'my-exam-attempt',
+        assignmentId: Number(examId),
+        attemptId: Number(attemptId),
+        groupId: 0, // Will be determined by component
+        examInstanceId: 0, // Will be determined by finding the correct instance from attempt data
+      });
+    } else if (examId) {
+      setActiveSection('my-trainings');
+      setCurrentView({
+        type: 'my-exam',
+        assignmentId: Number(examId),
+        groupId: 0, // Will be determined by component
+      });
+    } else if (groupId && moduleId && lessonId) {
+      setActiveSection('my-trainings');
+      setCurrentView({
+        type: 'my-lesson',
+        groupId: Number(groupId),
+        moduleId: Number(moduleId),
+        lessonId: Number(lessonId),
+      });
+    } else if (groupId && moduleId) {
+      setActiveSection('my-trainings');
+      setCurrentView({
+        type: 'my-module',
+        groupId: Number(groupId),
+        moduleId: Number(moduleId),
+      });
+    } else if (groupId && pathname.startsWith('/admins/groups/')) {
+      setActiveSection('groups');
+      setCurrentView({ type: 'group-detail', groupId });
+    } else if (groupId) {
+      setActiveSection('my-trainings');
+      setCurrentView({ type: 'my-group', groupId: Number(groupId) });
+    } else {
+      // Determine section from pathname
+      if (pathname.startsWith('/admins/my-')) {
+        setActiveSection('my-trainings');
+        if (pathname.startsWith('/admins/my-results')) {
+          setCurrentView({ type: 'my-results' });
+        } else if (pathname.startsWith('/admins/my-exams')) {
+          setCurrentView({ type: 'my-exams' });
+        } else {
+          setCurrentView({ type: 'my-groups' });
+        }
+      } else if (pathname.startsWith('/admins/results')) {
+        setActiveSection('results');
+        setCurrentView({ type: 'results' });
+      } else if (pathname.startsWith('/admins/groups')) {
+        setActiveSection('groups');
+        setCurrentView({ type: 'groups' });
+      } else {
+        setActiveSection('users');
+        setCurrentView({ type: 'users' });
+      }
+    }
+  }, [params]);
 
   const handleSectionChange = (section: typeof activeSection) => {
     setActiveSection(section);
@@ -260,9 +261,8 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               setActiveSection('users');
               navigate('/admins/users');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'users' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'users' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <Users className="w-5 h-5" />
             <span>Користувачі</span>
@@ -273,9 +273,8 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               setActiveSection('groups');
               navigate('/admins/groups');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'groups' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'groups' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <BookOpen className="w-5 h-5" />
             <span>Групи навчання</span>
@@ -286,9 +285,8 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               setActiveSection('results');
               navigate('/admins/results');
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'results' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'results' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
           >
             <ClipboardList className="w-5 h-5" />
             <span>Результати екзаменів</span>
@@ -303,9 +301,8 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   navigate('/admins/my-groups');
                 }
               }}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
-                activeSection === 'my-trainings' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${activeSection === 'my-trainings' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <User className="w-5 h-5" />
@@ -326,11 +323,10 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                     setCurrentView({ type: 'my-groups' });
                     navigate('/admins/my-groups');
                   }}
-                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
-                    currentView.type.startsWith('my-group') || currentView.type.startsWith('my-module') || currentView.type.startsWith('my-lesson')
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type.startsWith('my-group') || currentView.type.startsWith('my-module') || currentView.type.startsWith('my-lesson')
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                 >
                   <BookOpen className="w-4 h-4" />
                   <span>Мої групи навчання</span>
@@ -342,11 +338,10 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                     setCurrentView({ type: 'my-exams' });
                     navigate('/admins/my-exams');
                   }}
-                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
-                    currentView.type.startsWith('my-exam')
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type.startsWith('my-exam')
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                 >
                   <ClipboardList className="w-4 h-4" />
                   <span>Заплановані екзамени</span>
@@ -358,11 +353,10 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                     setCurrentView({ type: 'my-results' });
                     navigate('/admins/my-results');
                   }}
-                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
-                    currentView.type === 'my-results' || currentView.type === 'my-result-detail'
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type === 'my-results' || currentView.type === 'my-result-detail'
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                 >
                   <User className="w-4 h-4" />
                   <span>Результати</span>
@@ -396,6 +390,11 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           {renderContent()}
         </div>
       </main>
+
+      {/* Notification Bell - Fixed Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <NotificationBell />
+      </div>
     </div>
   );
 }

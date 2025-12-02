@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom-v5-compat';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom-v5-compat';
 import { LoginPage } from './components/LoginPage';
 import { EmailVerificationPage } from './components/EmailVerificationPage';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -7,6 +7,7 @@ import { UserDashboard } from './components/UserDashboard';
 import { ExamView } from './components/user/ExamView';
 import { ExamAttempt } from './components/user/ExamAttempt';
 import { useAuth } from './context/AuthContext';
+import { Toaster } from './components/ui/sonner';
 
 export default function App() {
   const { user, isLoading, hasTriedRestore, login, logout, refreshUser } = useAuth();
@@ -62,7 +63,13 @@ export default function App() {
     );
   }
 
-  return <AppRoutes user={user} onLogout={logout} />;
+  return (
+    <>
+      <Toaster />
+      <AppRoutes user={user} onLogout={logout} />
+    </>
+  );
+
 }
 
 function AppRoutes({ user, onLogout }: { user: any, onLogout: () => void }) {
@@ -205,12 +212,12 @@ function ExamViewWrapper({ navigate, params }: { navigate: any, params: any }) {
 }
 
 function ExamAttemptWrapper({ navigate, params }: { navigate: any, params: any }) {
-   return (
-     <ExamAttempt
-       examInstanceId={Number(params.attemptId)}
-       onComplete={() =>
-         navigate(`/groups/${params.groupId}/exams/${params.examId}`)
-       }
-     />
-   );
- }
+  return (
+    <ExamAttempt
+      examInstanceId={Number(params.attemptId)}
+      onComplete={() =>
+        navigate(`/groups/${params.groupId}/exams/${params.examId}`)
+      }
+    />
+  );
+}

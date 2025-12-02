@@ -60,8 +60,9 @@
       cors: true,
       hmr: {
         protocol: 'ws',
-        host: 'education.local',
-        port: 80   // если HMR через Traefik (порт http)
+        host: 'soketi.dev',
+        port: 80
       },
+      allowedHosts: ['education.local']
     },
   });
