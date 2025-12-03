@@ -16,7 +16,7 @@ interface Answer {
   exam_attempt_id: number;
   question_id: number;
   answer: string;
-  is_correct: boolean;
+  is_correct: boolean | null;
   graded_by: number | null;
   created_at: string;
   updated_at: string;
@@ -81,20 +81,7 @@ interface Group {
   updated_at: string;
 }
 
-interface ExamAssignment {
-  id: number;
-  attempts_allowed: number;
-  is_control: boolean;
-  start_at: string;
-  end_at: string;
-  group_id: number;
-  exam: Exam;
-  instances: Instance[];
-  result: Result;
-  group: Group;
-  created_at: string;
-  updated_at: string;
-}
+
 
 interface ExamResultDetailProps {
   assignmentId: number;
@@ -151,8 +138,7 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
     );
   }
 
-  // Type assertion for the assignment data
-  const typedAssignment = assignment as any;
+
 
   const currentInstance = instances[selectedInstanceIndex];
   if (!currentInstance) {
@@ -192,8 +178,9 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
   };
 
   const totalQuestions = attempt.answers?.length ?? 0;
-  const correctAnswers = attempt.answers?.filter(a => a.is_correct).length ?? 0;
-  const incorrectAnswers = totalQuestions - correctAnswers;
+  const correctAnswers = attempt.answers?.filter(a => a.is_correct === true).length ?? 0;
+  const incorrectAnswers = attempt.answers?.filter(a => a.is_correct === false).length ?? 0;
+  const pendingAnswers = attempt.answers?.filter(a => a.is_correct === null).length ?? 0;
   const percentage = Math.round(((attempt.score ?? 0) / totalQuestions) * 100);
   const isPassed = assignment.result?.slug === 'passed';
 
@@ -227,7 +214,8 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
   // Дані для кругової діаграми
   const pieData = [
     { name: 'Правильні', value: correctAnswers, color: '#22c55e' },
-    { name: 'Неправильні', value: incorrectAnswers, color: '#ef4444' }
+    { name: 'Неправильні', value: incorrectAnswers, color: '#ef4444' },
+    ...(pendingAnswers > 0 ? [{ name: 'Очікує перевірки', value: pendingAnswers, color: '#9ca3af' }] : [])
   ];
 
   // Дані для порівняння спроб
@@ -285,9 +273,8 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                isPassed ? 'bg-green-100' : 'bg-red-100'
-              }`}>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isPassed ? 'bg-green-100' : 'bg-red-100'
+                }`}>
                 {isPassed ? (
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 ) : (
@@ -336,6 +323,13 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
               <div className="text-xl text-red-600">{incorrectAnswers}</div>
               <div className="text-sm text-gray-600">Неправильно</div>
             </div>
+            {pendingAnswers > 0 && (
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <Clock className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                <div className="text-xl text-gray-600">{pendingAnswers}</div>
+                <div className="text-sm text-gray-600">Очікує перевірки</div>
+              </div>
+            )}
             <div className="text-center p-3 bg-blue-50 rounded-lg">
               <Clock className="w-6 h-6 mx-auto mb-2 text-blue-600" />
               <div className="text-xl text-blue-600">{Math.floor((attempt.elapsed_seconds ?? 0) / 60)}</div>
@@ -416,6 +410,12 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
                 <div className="text-2xl text-red-600">{incorrectAnswers}</div>
                 <div className="text-sm text-gray-600">Помилок</div>
               </div>
+              {pendingAnswers > 0 && (
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl text-gray-600">{pendingAnswers}</div>
+                  <div className="text-sm text-gray-600">Очікує перевірки</div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -452,9 +452,8 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
                 return (
                   <div
                     key={data.attempt}
-                    className={`flex items-center justify-between text-sm p-2 rounded ${
-                      isCurrentAttempt ? 'bg-blue-50 border border-blue-200' : ''
-                    }`}
+                    className={`flex items-center justify-between text-sm p-2 rounded ${isCurrentAttempt ? 'bg-blue-50 border border-blue-200' : ''
+                      }`}
                   >
                     <span className={isCurrentAttempt ? '' : 'text-gray-600'}>{data.attempt}</span>
                     <div className="flex items-center gap-2">
@@ -478,49 +477,72 @@ export function ExamResultDetail({ assignmentId, instanceId }: ExamResultDetailP
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {attempt.answers?.map((answer, index) => (
-              <Card
-                key={answer.id}
-                className={answer.is_correct ? 'border-green-200 bg-green-50/50' : 'border-red-200 bg-red-50/50'}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      answer.is_correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                    }`}>
-                      {answer.is_correct ? (
-                        <CheckCircle className="w-5 h-5" />
-                      ) : (
-                        <XCircle className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4>Питання {index + 1}</h4>
-                        <Badge variant="outline" className="text-xs">
-                          ID: {answer.question_id}
-                        </Badge>
-                      </div>
+            {attempt.answers?.map((answer, index) => {
+              const getAnswerStyle = () => {
+                if (answer.is_correct === true) return 'border-green-200 bg-green-50/50';
+                if (answer.is_correct === false) return 'border-red-200 bg-red-50/50';
+                return 'border-gray-200 bg-gray-50/50';
+              };
 
-                      <div className="space-y-2">
-                        <div className={`p-3 rounded-lg ${
-                          answer.is_correct ? 'bg-green-100 border border-green-200' : 'bg-red-100 border border-red-200'
-                        }`}>
-                          <div className="text-sm text-gray-600 mb-1">Ваша відповідь:</div>
-                          <div>{answer.answer}</div>
-                        </div>
+              const getIconStyle = () => {
+                if (answer.is_correct === true) return 'bg-green-100 text-green-600';
+                if (answer.is_correct === false) return 'bg-red-100 text-red-600';
+                return 'bg-gray-100 text-gray-600';
+              };
 
-                        {answer.graded_by && (
-                          <div className="text-sm text-gray-500">
-                            Перевірено викладачем (ID: {answer.graded_by})
-                          </div>
+              const getAnswerBoxStyle = () => {
+                if (answer.is_correct === true) return 'bg-green-100 border border-green-200';
+                if (answer.is_correct === false) return 'bg-red-100 border border-red-200';
+                return 'bg-gray-100 border border-gray-200';
+              };
+
+              return (
+                <Card
+                  key={answer.id}
+                  className={getAnswerStyle()}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${getIconStyle()}`}>
+                        {answer.is_correct === true ? (
+                          <CheckCircle className="w-5 h-5" />
+                        ) : answer.is_correct === false ? (
+                          <XCircle className="w-5 h-5" />
+                        ) : (
+                          <Clock className="w-5 h-5" />
                         )}
                       </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4>Питання {index + 1}</h4>
+                          <Badge variant="outline" className="text-xs">
+                            ID: {answer.question_id}
+                          </Badge>
+                          {answer.is_correct === null && (
+                            <Badge variant="secondary" className="text-xs">
+                              Очікує перевірки
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className={`p-3 rounded-lg ${getAnswerBoxStyle()}`}>
+                            <div className="text-sm text-gray-600 mb-1">Ваша відповідь:</div>
+                            <div>{answer.answer}</div>
+                          </div>
+
+                          {answer.graded_by && (
+                            <div className="text-sm text-gray-500">
+                              Перевірено викладачем (ID: {answer.graded_by})
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

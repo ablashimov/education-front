@@ -104,15 +104,15 @@ export interface BackendExamAssignment {
 }
 
 export interface BackendExamInstanceQuestion {
+  id: number;
+  text: string;
+  score: number;
+  question_type?: {
     id: number;
-    text: string;
-    score: number;
-    question_type?: {
-        id: number;
-        name: string;
-        slug?: string;
-    } | null;
-    metadata?: Record<string, unknown> | null;
+    name: string;
+    slug?: string;
+  } | null;
+  metadata?: Record<string, unknown> | null;
   choices: Record<string, unknown> | null;
 }
 
@@ -145,7 +145,7 @@ export interface BackendExamAnswer {
   exam_attempt_id: number;
   question_id: number;
   answer: string;
-  is_correct: boolean;
+  is_correct: boolean | null;
   graded_by: number | null;
   created_at: string;
   updated_at: string;

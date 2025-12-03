@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Clock, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { fetchResults, type FetchResultsResult } from '@/services/results';
 import type { BackendExamAssignment } from '@/types/backend';
 import { format } from 'date-fns';
@@ -29,7 +29,6 @@ export function ExamResultsAdmin() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterStartDate, setFilterStartDate] = useState<string>('');
   const [filterEndDate, setFilterEndDate] = useState<string>('');
-  const [selected, setSelected] = useState<BackendExamAssignment | null>(null);
 
   // Fetch statuses
   const { data: statuses = [] } = useQuery<ExamStatus[]>({
@@ -128,7 +127,7 @@ export function ExamResultsAdmin() {
       header: "",
       cell: (item) => (
         <div className="text-right">
-          <Button size="sm" variant="outline" onClick={() => setSelected(item)}>
+          <Button size="sm" variant="outline" onClick={() => window.location.href = `/admins/my-results/${item.id}`}>
             Детальніше
           </Button>
         </div>
@@ -224,81 +223,6 @@ export function ExamResultsAdmin() {
             searchPlaceholder="Пошук за користувачем або курсом..."
             filters={filters}
           />
-
-          {selected && (
-            <div className="mt-6 border-t pt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Деталі результату</CardTitle>
-                  <CardDescription>
-                    {selected.user?.name ?? '—'} • {selected.user?.email ?? '—'} — {selected.group?.name ?? selected.group?.course?.title ?? '—'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    {getStatusBadge(selected.result?.slug, selected.result?.name)}
-                    <div className="text-sm text-gray-600">
-                      Екзамен: <span className="font-medium">{selected.exam?.title ?? '—'}</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Вікно: {selected.start_at ? format(new Date(selected.start_at), 'dd.MM.yyyy, HH:mm', { locale: uk }) : '—'} — {selected.end_at ? format(new Date(selected.end_at), 'dd.MM.yyyy, HH:mm', { locale: uk }) : '—'}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="font-medium">Спроби (інстанси)</div>
-                    {(selected.instances ?? []).length === 0 ? (
-                      <div className="text-sm text-gray-500">Немає спроб</div>
-                    ) : (
-                      <div className="border rounded-md divide-y">
-                        {(selected.instances ?? []).map((inst) => (
-                          <div key={inst.id} className="p-3 flex items-center justify-between gap-4">
-                            <div className="text-sm">
-                              <div className="font-medium">Спроба #{inst.attempt_number}</div>
-                              <div className="text-gray-600 flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                <span>
-                                  Початок: {inst.start_at ? format(new Date(inst.start_at), 'dd.MM.yyyy, HH:mm', { locale: uk }) : '—'}
-                                </span>
-                                <span>·</span>
-                                <span>
-                                  Кінець: {inst.end_at ? format(new Date(inst.end_at), 'dd.MM.yyyy, HH:mm', { locale: uk }) : '—'}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-700">
-                              Статус: {inst.end_at ? 'Завершено' : 'В процесі'}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {selected.attempt && (
-                    <div className="space-y-3 mt-6">
-                      <div className="font-medium">Спроба перевірки</div>
-                      <div className="border rounded-md divide-y">
-                        <div className="p-3 flex items-center justify-between gap-4">
-                          <div className="text-sm">
-                            <div className="font-medium">Attempt ID: {selected.attempt.id}</div>
-                            <div className="text-gray-600">
-                              Подано: {selected.attempt.submitted_at ? format(new Date(selected.attempt.submitted_at), 'dd.MM.yyyy, HH:mm', { locale: uk }) : '—'}
-                            </div>
-                          </div>
-                          <div className="text-sm text-gray-700">Бал: {selected.attempt.score ?? '—'}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-6">
-                    <Button variant="outline" onClick={() => setSelected(null)}>Закрити</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
