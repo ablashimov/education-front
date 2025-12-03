@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Skeleton } from '../ui/skeleton';
 import { UserPlus, Trash2, Eye, Loader2, Filter } from 'lucide-react';
 import { createUser, deleteUser, fetchUser, fetchUsers } from '@/services/users';
+import { extractValidationErrors, getFirstError, type ValidationErrors } from '@/lib/errorUtils';
 import type { FetchUsersResult } from '@/services/users';
 import type { BackendUser } from '@/types/backend';
 import { DataTable, type Column } from '../common/DataTable';
@@ -41,6 +42,7 @@ export function UserManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', rank: '' });
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   // Filters
   const [filterEmail, setFilterEmail] = useState('');
@@ -93,6 +95,11 @@ export function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsCreateDialogOpen(false);
       setNewUser({ name: '', email: '', password: '', rank: '' });
+      setValidationErrors(null);
+    },
+    onError: (error) => {
+      const errors = extractValidationErrors(error);
+      setValidationErrors(errors);
     },
   });
 
@@ -236,7 +243,11 @@ export function UserManagement() {
                       value={newUser.name}
                       onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                       placeholder="Введіть ім'я користувача"
+                      className={getFirstError(validationErrors, 'name') ? 'border-red-500' : ''}
                     />
+                    {getFirstError(validationErrors, 'name') && (
+                      <p className="text-sm text-red-600 mt-1">{getFirstError(validationErrors, 'name')}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -246,7 +257,11 @@ export function UserManagement() {
                       value={newUser.email}
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                       placeholder="user@example.com"
+                      className={getFirstError(validationErrors, 'email') ? 'border-red-500' : ''}
                     />
+                    {getFirstError(validationErrors, 'email') && (
+                      <p className="text-sm text-red-600 mt-1">{getFirstError(validationErrors, 'email')}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Пароль</Label>
@@ -256,7 +271,11 @@ export function UserManagement() {
                       value={newUser.password}
                       onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                       placeholder="Мінімум 6 символів"
+                      className={getFirstError(validationErrors, 'password') ? 'border-red-500' : ''}
                     />
+                    {getFirstError(validationErrors, 'password') && (
+                      <p className="text-sm text-red-600 mt-1">{getFirstError(validationErrors, 'password')}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="rank">Звання / посада</Label>
@@ -265,7 +284,11 @@ export function UserManagement() {
                       value={newUser.rank}
                       onChange={(e) => setNewUser({ ...newUser, rank: e.target.value })}
                       placeholder="Наприклад, інструктор"
+                      className={getFirstError(validationErrors, 'rank') ? 'border-red-500' : ''}
                     />
+                    {getFirstError(validationErrors, 'rank') && (
+                      <p className="text-sm text-red-600 mt-1">{getFirstError(validationErrors, 'rank')}</p>
+                    )}
                   </div>
                   <Button
                     onClick={handleSubmitNewUser}
@@ -281,10 +304,12 @@ export function UserManagement() {
                       'Створити користувача'
                     )}
                   </Button>
-                  {createUserMutation.isError && (
+                  {createUserMutation.isError && !validationErrors && (
                     <Alert variant="destructive">
                       <AlertDescription>
-                        Не вдалося створити користувача. Перевірте дані та спробуйте ще раз.
+                        {createUserMutation.error instanceof Error
+                          ? createUserMutation.error.message
+                          : 'Не вдалося створити користувача. Перевірте дані та спробуйте ще раз.'}
                       </AlertDescription>
                     </Alert>
                   )}

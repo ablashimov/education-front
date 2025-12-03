@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import { handleApiError } from '@/lib/errorUtils';
 import type { BackendUser, PaginatedResponse, PaginationMeta } from '@/types/backend';
 
 type ApiResource<T> = { data: T };
@@ -70,10 +71,18 @@ export async function fetchUser(userId: number): Promise<BackendUser> {
 }
 
 export async function createUser(payload: CreateUserPayload): Promise<BackendUser> {
-  const { data } = await apiClient.post<ApiResource<BackendUser>>('/users', payload);
-  return unwrap(data);
+  try {
+    const { data } = await apiClient.post<ApiResource<BackendUser>>('/users', payload);
+    return unwrap(data);
+  } catch (error) {
+    handleApiError(error, 'Failed to create user');
+  }
 }
 
 export async function deleteUser(userId: number): Promise<void> {
-  await apiClient.delete(`/users/${userId}`);
+  try {
+    await apiClient.delete(`/users/${userId}`);
+  } catch (error) {
+    handleApiError(error, 'Failed to delete user');
+  }
 }

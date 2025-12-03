@@ -6,6 +6,9 @@ import { Badge } from './ui/badge';
 import { UserManagement } from './admin/UserManagement';
 import { TrainingGroupsAdmin } from './admin/TrainingGroupsAdmin';
 import { ExamResultsAdmin } from './admin/ExamResultsAdmin';
+import { Forum } from './admin/Forum';
+import { ForumTopicDetail } from './admin/ForumTopicDetail';
+import { ForumNewTopic } from './admin/ForumNewTopic';
 import { TrainingGroupDetail } from './TrainingGroupDetail';
 import { MyTrainingGroups } from './user/MyTrainingGroups';
 import { MyExams } from './user/MyExams';
@@ -16,7 +19,7 @@ import { LessonView } from './user/LessonView';
 import { ExamView } from './user/ExamView';
 import { ExamAttempt } from './user/ExamAttempt';
 import { ExamResultDetail } from './user/ExamResultDetail';
-import { LogOut, Users, BookOpen, ClipboardList, User, ChevronDown, ChevronRight } from 'lucide-react';
+import { LogOut, Users, BookOpen, ClipboardList, User, ChevronDown, ChevronRight, MessageSquare } from 'lucide-react';
 import type { AuthUser } from '@/context/AuthContext';
 import { NotificationBell } from './NotificationBell';
 
@@ -30,6 +33,9 @@ type View =
   | { type: 'groups' }
   | { type: 'group-detail'; groupId: string }
   | { type: 'results' }
+  | { type: 'forum' }
+  | { type: 'forum-topic'; topicId: string }
+  | { type: 'forum-new-topic' }
   | { type: 'my-groups' }
   | { type: 'my-group'; groupId: number }
   | { type: 'my-module'; groupId: number; moduleId: number }
@@ -43,7 +49,7 @@ type View =
 export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   const params = useParams();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState<'users' | 'groups' | 'results' | 'my-trainings'>('users');
+  const [activeSection, setActiveSection] = useState<'users' | 'groups' | 'results' | 'forum' | 'my-trainings'>('users');
   const [currentView, setCurrentView] = useState<View>({ type: 'users' });
   const [myTrainingsExpanded, setMyTrainingsExpanded] = useState(false);
 
@@ -106,6 +112,16 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
       } else if (pathname.startsWith('/admins/results')) {
         setActiveSection('results');
         setCurrentView({ type: 'results' });
+      } else if (pathname.startsWith('/admins/forum')) {
+        setActiveSection('forum');
+        if (pathname.startsWith('/admins/forum/new')) {
+          setCurrentView({ type: 'forum-new-topic' });
+        } else if (pathname.match(/\/admins\/forum\/topics\/(\d+)/)) {
+          const topicId = pathname.match(/\/admins\/forum\/topics\/(\d+)/)?.[1];
+          setCurrentView({ type: 'forum-topic', topicId: topicId || '' });
+        } else {
+          setCurrentView({ type: 'forum' });
+        }
       } else if (pathname.startsWith('/admins/groups')) {
         setActiveSection('groups');
         setCurrentView({ type: 'groups' });
@@ -144,6 +160,26 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         return <TrainingGroupDetail groupId={params.groupId || ''} />;
       case 'results':
         return <ExamResultsAdmin />;
+      case 'forum':
+        return <Forum
+          organizationId={String(user.organizationId || '')}
+          currentUserId={String(user.id)}
+          onTopicClick={(topicId) => navigate(`/admins/forum/topics/${topicId}`)}
+          onNewTopicClick={() => navigate('/admins/forum/new')}
+        />;
+      case 'forum-topic':
+        return <ForumTopicDetail
+          topicId={currentView.topicId}
+          currentUserId={String(user.id)}
+          onBack={() => navigate('/admins/forum')}
+        />;
+      case 'forum-new-topic':
+        return <ForumNewTopic
+          organizationId={String(user.organizationId || '')}
+          currentUserId={String(user.id)}
+          onBack={() => navigate('/admins/forum')}
+          onSubmit={(topicId) => navigate(`/admins/forum/topics/${topicId}`)}
+        />;
       case 'my-groups':
         return (
           <MyTrainingGroups
@@ -290,6 +326,18 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           >
             <ClipboardList className="w-5 h-5" />
             <span>Результати екзаменів</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveSection('forum');
+              navigate('/admins/forum');
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'forum' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span>Форум</span>
           </button>
 
           <div>

@@ -181,6 +181,16 @@ function AppRoutes({ user, onLogout }: { user: any, onLogout: () => void }) {
             <Route path="/admins/my-results/:resultId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
+            {/* Forum routes */}
+            <Route path="/admins/forum" element={
+              <AdminDashboard onLogout={onLogout} user={user} />
+            } />
+            <Route path="/admins/forum/topics/:topicId" element={
+              <AdminDashboard onLogout={onLogout} user={user} />
+            } />
+            <Route path="/admins/forum/new" element={
+              <AdminDashboard onLogout={onLogout} user={user} />
+            } />
           </>
         )}
         {/* Legacy routes for backward compatibility */}

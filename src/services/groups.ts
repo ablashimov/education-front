@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import { handleApiError } from '@/lib/errorUtils';
 import type {
   BackendGroup,
   BackendModule,
@@ -128,18 +129,26 @@ export async function getGroupById(groupId: number): Promise<BackendGroup> {
 }
 
 export async function createGroupInvite(groupId: number, userId: number): Promise<BackendUserGroupInvite> {
-  const { data } = await apiClient.post<ApiResource<BackendUserGroupInvite> | BackendUserGroupInvite>(
-    `/groups/${groupId}/invites`,
-    {
-      user_id: userId,
-    },
-  );
+  try {
+    const { data } = await apiClient.post<ApiResource<BackendUserGroupInvite> | BackendUserGroupInvite>(
+      `/groups/${groupId}/invites`,
+      {
+        user_id: userId,
+      },
+    );
 
-  return hasDataProp(data) ? unwrapResource(data as ApiResource<BackendUserGroupInvite>) : (data as BackendUserGroupInvite);
+    return hasDataProp(data) ? unwrapResource(data as ApiResource<BackendUserGroupInvite>) : (data as BackendUserGroupInvite);
+  } catch (error) {
+    handleApiError(error, 'Failed to create invite');
+  }
 }
 
 export async function deleteGroupInvite(groupId: number, inviteId: number): Promise<void> {
-  await apiClient.delete(`/groups/${groupId}/invites/${inviteId}`);
+  try {
+    await apiClient.delete(`/groups/${groupId}/invites/${inviteId}`);
+  } catch (error) {
+    handleApiError(error, 'Failed to delete invite');
+  }
 }
 
 export async function fetchGroupModules(groupId: number): Promise<BackendModule[]> {
