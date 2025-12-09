@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { getGroupById, fetchGroupModule, fetchLesson } from '@/services/groups';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
-import { AlertCircle, FileText, Download } from 'lucide-react';
+import { AlertCircle, FileText, Eye } from 'lucide-react';
+import { SecureFileViewer } from '../common/SecureFileViewer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { BackendFile } from '@/types/backend';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,9 +36,9 @@ export function LessonView({
     console.log('Navigate to module', moduleId);
   },
 }: LessonViewProps) {
-  const { 
-    data: group, 
-    isLoading: isGroupLoading, 
+  const {
+    data: group,
+    isLoading: isGroupLoading,
     isError: isGroupError,
     error: groupError,
   } = useQuery({
@@ -67,6 +70,15 @@ export function LessonView({
   });
 
   const files = useMemo(() => lesson?.files ?? [], [lesson]);
+  const [selectedFile, setSelectedFile] = useState<BackendFile | null>(null);
+
+  const handleViewFile = (file: BackendFile) => {
+    setSelectedFile(file);
+  };
+
+  const isViewable = (mimetype: string) => {
+    return mimetype === 'application/pdf' || mimetype.startsWith('video/');
+  };
 
   return (
     <div className="space-y-6">
@@ -208,16 +220,19 @@ export function LessonView({
                       </div>
                     </div>
                   </div>
-                  {file.path_url && (
-                    <a
-                      href={file.path_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700"
+
+                  {isViewable(file.mimetype) ? (
+                    <button
+                      onClick={() => handleViewFile(file)}
+                      className="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                     >
-                      <Download className="w-4 h-4" />
-                      Завантажити
-                    </a>
+                      <Eye className="w-4 h-4" />
+                      Переглянути
+                    </button>
+                  ) : (
+                    <span className="text-sm text-gray-400 italic">
+                      Перегляд недоступний
+                    </span>
                   )}
                 </div>
               ))}
@@ -225,6 +240,24 @@ export function LessonView({
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!selectedFile} onOpenChange={(open) => !open && setSelectedFile(null)}>
+        <DialogContent className="!fixed !inset-0 !max-w-none !w-full !h-full !max-h-none !translate-x-0 !translate-y-0 !rounded-none !border-none p-0 gap-0 flex flex-col bg-gray-50 overflow-hidden z-50">
+          <DialogHeader className="p-4 border-b bg-white shrink-0">
+            <DialogTitle>{selectedFile?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedFile && (
+            <div className="w-full relative" style={{ height: 'calc(100vh - 65px)' }}>
+              <SecureFileViewer
+                lessonId={lessonId}
+                fileId={selectedFile.id}
+                fileType={selectedFile.mimetype === 'application/pdf' ? 'pdf' : 'video'}
+                fileName={selectedFile.name}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
