@@ -6,7 +6,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
 import { AlertCircle, FileText, Eye } from 'lucide-react';
 import { SecureFileViewer } from '../common/SecureFileViewer';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { BackendFile } from '@/types/backend';
 import {
   Breadcrumb,
@@ -16,6 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '../ui/breadcrumb';
+import FullScreenDialog from '@/components/ui/custom-dialog'
 
 interface LessonViewProps {
   groupId: number;
@@ -241,23 +242,22 @@ export function LessonView({
         </Card>
       )}
 
-      <Dialog open={!!selectedFile} onOpenChange={(open) => !open && setSelectedFile(null)}>
-        <DialogContent className="!fixed !inset-0 !max-w-none !w-full !h-full !max-h-none !translate-x-0 !translate-y-0 !rounded-none !border-none p-0 gap-0 flex flex-col bg-gray-50 overflow-hidden z-50">
-          <DialogHeader className="p-4 border-b bg-white shrink-0">
-            <DialogTitle>{selectedFile?.name}</DialogTitle>
-          </DialogHeader>
-          {selectedFile && (
-            <div className="w-full relative" style={{ height: 'calc(100vh - 65px)' }}>
-              <SecureFileViewer
-                lessonId={lessonId}
-                fileId={selectedFile.id}
-                fileType={selectedFile.mimetype === 'application/pdf' ? 'pdf' : 'video'}
-                fileName={selectedFile.name}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        <FullScreenDialog
+            open={!!selectedFile}
+            onClose={() => setSelectedFile(null)}
+            title={selectedFile?.name}
+        >
+            {selectedFile && (
+                <div className="w-full h-full">
+                    <SecureFileViewer
+                        lessonId={lessonId}
+                        fileId={selectedFile.id}
+                        fileType={selectedFile.mimetype === "application/pdf" ? "pdf" : "video"}
+                        fileName={selectedFile.name}
+                    />
+                </div>
+            )}
+        </FullScreenDialog>
     </div>
   );
 }

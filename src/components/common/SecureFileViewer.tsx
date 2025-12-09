@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import { Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 interface SecureFileViewerProps {
     lessonId: number;
@@ -75,14 +77,15 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
             <DocViewer
                 documents={docs}
                 pluginRenderers={DocViewerRenderers}
-                style={{ height: '100%', width: '100%' }}
+                style={{ height: 'calc(100vh - 300px)', overflowY: 'auto', width: 'calc(100vw - 300px)' }}
                 config={{
                     header: {
                         disableHeader: false,
-                        disableFileName: false,
+                        disableFileName: true,
                         retainURLParams: false
                     },
                     pdfVerticalScrollByDefault: true,
+
                 }}
             />
         </div>

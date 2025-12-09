@@ -58,11 +58,6 @@
       port: 3000,
       strictPort: false,
       cors: true,
-      hmr: {
-        protocol: 'ws',
-        host: 'soketi.dev',
-        port: 80
-      },
       allowedHosts: ['education.local']
     },
   });

@@ -47,6 +47,7 @@ const echo = new Echo({
                         callback(null, response.data);
                     })
                     .catch(error => {
+                        console.log(error);
                         callback(error);
                     });
             }
