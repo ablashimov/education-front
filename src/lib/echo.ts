@@ -12,13 +12,14 @@ declare global {
 window.Pusher = Pusher;
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://education.local';
+const soketiPort = import.meta.env.SOKETI_PORT ?? 6001;
 
 const echo = new Echo({
     broadcaster: 'pusher',
     key: 'app-key',
     wsHost: window.location.hostname,
-    wsPort: 6001,
-    wssPort: 6001,
+    wsPort: soketiPort,
+    wssPort: soketiPort,
     forceTLS: false,
     encrypted: false,
     disableStats: true,
