@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export default function FullScreenDialog({ open, onClose, title, children }: any) {
     // ESC для закрытия
     useEffect(() => {
         if (!open) return;
 
-        const handleKey = (e) => {
+        const handleKey = (e: any) => {
             if (e.key === "Escape") onClose();
         };
         window.addEventListener("keydown", handleKey);
@@ -14,7 +14,7 @@ export default function FullScreenDialog({ open, onClose, title, children }: any
 
     if (!open) return null;
 
-    const stop = (e) => e.stopPropagation();
+    const stop = (e: any) => e.stopPropagation();
 
     return (
         <>
