@@ -127,7 +127,7 @@ export function ExamResultsAdmin() {
       header: "",
       cell: (item) => (
         <div className="text-right">
-          <Button size="sm" variant="outline" onClick={() => window.location.href = `/admins/my-results/${item.id}`}>
+          <Button size="sm" variant="outline" onClick={() => window.location.href = `/admin/my-results/${item.id}`}>
             Детальніше
           </Button>
         </div>
@@ -189,7 +189,7 @@ export function ExamResultsAdmin() {
   // but removing features is bad.
   // The original code calculated stats from ALL results because it fetched all: true.
   // Since we switched to pagination, we lost global stats.
-  // I will remove the stats cards for now to avoid showing wrong data, 
+  // I will remove the stats cards for now to avoid showing wrong data,
   // OR I can keep them if I fetch 'all' separately?
   // The user wants "Improve Admin Panel Functionality".
   // I'll remove them for now as they are not part of the "Table" requirements and might be misleading with pagination.

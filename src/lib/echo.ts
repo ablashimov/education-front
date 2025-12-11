@@ -1,6 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import axios from 'axios';
+import { apiClient, ensureCsrfCookie } from '@/lib/api'
 
 declare global {
     interface Window {
@@ -12,14 +12,11 @@ declare global {
 window.Pusher = Pusher;
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://education.local';
-const soketiPort = import.meta.env.SOKETI_PORT ?? 6001;
 
 const echo = new Echo({
     broadcaster: 'pusher',
     key: 'app-key',
     wsHost: window.location.hostname,
-    wsPort: soketiPort,
-    wssPort: soketiPort,
     forceTLS: false,
     encrypted: false,
     disableStats: true,
@@ -33,8 +30,9 @@ const echo = new Echo({
     },
     authorizer: (channel: any) => {
         return {
-            authorize: (socketId: string, callback: Function) => {
-                axios.post(`${backendUrl}/api/broadcasting/auth`, {
+            authorize: async (socketId: string, callback: Function) => {
+                await ensureCsrfCookie();
+                apiClient.post(`${backendUrl}/api/broadcasting/auth`, {
                     socket_id: socketId,
                     channel_name: channel.name
                 }, {

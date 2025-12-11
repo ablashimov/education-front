@@ -126,69 +126,69 @@ function AppRoutes({ user, onLogout }: { user: any, onLogout: () => void }) {
         {/* Admin Dashboard Routes - only for admin users */}
         {user?.role === 'admin' && (
           <>
-            <Route path="/admins/users" element={
+            <Route path="/admin/users" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/groups" element={
+            <Route path="/admin/groups" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/groups/:groupId" element={
+            <Route path="/admin/groups/:groupId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/groups/:groupId/modules/:moduleId" element={
+            <Route path="/admin/groups/:groupId/modules/:moduleId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/groups/:groupId/modules/:moduleId/lessons/:lessonId" element={
+            <Route path="/admin/groups/:groupId/modules/:moduleId/lessons/:lessonId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/exams/:examId" element={
+            <Route path="/admin/exams/:examId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/exams/:examId/attempt/:attemptId" element={
+            <Route path="/admin/exams/:examId/attempt/:attemptId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/results" element={
+            <Route path="/admin/results" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/results/:resultId" element={
+            <Route path="/admin/results/:resultId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
             {/* Admin "My Training" routes - same as user routes but with admin prefix */}
-            <Route path="/admins/my-groups" element={
+            <Route path="/admin/my-groups" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-groups/:groupId" element={
+            <Route path="/admin/my-groups/:groupId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-groups/:groupId/modules/:moduleId" element={
+            <Route path="/admin/my-groups/:groupId/modules/:moduleId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-groups/:groupId/modules/:moduleId/lessons/:lessonId" element={
+            <Route path="/admin/my-groups/:groupId/modules/:moduleId/lessons/:lessonId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-exams" element={
+            <Route path="/admin/my-exams" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-exams/:examId" element={
+            <Route path="/admin/my-exams/:examId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-exams/:examId/attempt/:attemptId" element={
+            <Route path="/admin/my-exams/:examId/attempt/:attemptId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-results" element={
+            <Route path="/admin/my-results" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/my-results/:resultId" element={
+            <Route path="/admin/my-results/:resultId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
             {/* Forum routes */}
-            <Route path="/admins/forum" element={
+            <Route path="/admin/forum" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/forum/topics/:topicId" element={
+            <Route path="/admin/forum/topics/:topicId" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
-            <Route path="/admins/forum/new" element={
+            <Route path="/admin/forum/new" element={
               <AdminDashboard onLogout={onLogout} user={user} />
             } />
           </>

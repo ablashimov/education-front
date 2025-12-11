@@ -5,6 +5,7 @@ const apiPrefix = import.meta.env.VITE_API_PREFIX ?? '/api/v1';
 
 export const apiClient = axios.create({
   baseURL: `${backendUrl}${apiPrefix}`,
+  withXSRFToken: true,
   withCredentials: true,
   headers: {
     'Accept': 'application/json',
@@ -40,5 +41,5 @@ apiClient.interceptors.response.use(
 );
 
 export async function ensureCsrfCookie(): Promise<void> {
-  await axios.get(`${backendUrl}/sanctum/csrf-cookie`, { withCredentials: true });
+  await apiClient.get(`${backendUrl}/sanctum/csrf-cookie`);
 }

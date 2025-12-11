@@ -92,7 +92,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         groupId: Number(groupId),
         moduleId: Number(moduleId),
       });
-    } else if (groupId && pathname.startsWith('/admins/groups/')) {
+    } else if (groupId && pathname.startsWith('/admin/groups/')) {
       setActiveSection('groups');
       setCurrentView({ type: 'group-detail', groupId });
     } else if (groupId) {
@@ -100,29 +100,29 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
       setCurrentView({ type: 'my-group', groupId: Number(groupId) });
     } else {
       // Determine section from pathname
-      if (pathname.startsWith('/admins/my-')) {
+      if (pathname.startsWith('/admin/my-')) {
         setActiveSection('my-trainings');
-        if (pathname.startsWith('/admins/my-results')) {
+        if (pathname.startsWith('/admin/my-results')) {
           setCurrentView({ type: 'my-results' });
-        } else if (pathname.startsWith('/admins/my-exams')) {
+        } else if (pathname.startsWith('/admin/my-exams')) {
           setCurrentView({ type: 'my-exams' });
         } else {
           setCurrentView({ type: 'my-groups' });
         }
-      } else if (pathname.startsWith('/admins/results')) {
+      } else if (pathname.startsWith('/admin/results')) {
         setActiveSection('results');
         setCurrentView({ type: 'results' });
-      } else if (pathname.startsWith('/admins/forum')) {
+      } else if (pathname.startsWith('/admin/forum')) {
         setActiveSection('forum');
-        if (pathname.startsWith('/admins/forum/new')) {
+        if (pathname.startsWith('/admin/forum/new')) {
           setCurrentView({ type: 'forum-new-topic' });
-        } else if (pathname.match(/\/admins\/forum\/topics\/(\d+)/)) {
-          const topicId = pathname.match(/\/admins\/forum\/topics\/(\d+)/)?.[1];
+        } else if (pathname.match(/\/admin\/forum\/topics\/(\d+)/)) {
+          const topicId = pathname.match(/\/admin\/forum\/topics\/(\d+)/)?.[1];
           setCurrentView({ type: 'forum-topic', topicId: topicId || '' });
         } else {
           setCurrentView({ type: 'forum' });
         }
-      } else if (pathname.startsWith('/admins/groups')) {
+      } else if (pathname.startsWith('/admin/groups')) {
         setActiveSection('groups');
         setCurrentView({ type: 'groups' });
       } else {
@@ -154,7 +154,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         return <UserManagement />;
       case 'groups':
         return <TrainingGroupsAdmin organizationId={String(user.organizationId || '')} onGroupClick={(groupId) => {
-          navigate(`/admins/groups/${groupId}`);
+          navigate(`/admin/groups/${groupId}`);
         }} />;
       case 'group-detail':
         return <TrainingGroupDetail groupId={params.groupId || ''} />;
@@ -164,27 +164,27 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         return <Forum
           organizationId={String(user.organizationId || '')}
           currentUserId={String(user.id)}
-          onTopicClick={(topicId) => navigate(`/admins/forum/topics/${topicId}`)}
-          onNewTopicClick={() => navigate('/admins/forum/new')}
+          onTopicClick={(topicId) => navigate(`/admin/forum/topics/${topicId}`)}
+          onNewTopicClick={() => navigate('/admin/forum/new')}
         />;
       case 'forum-topic':
         return <ForumTopicDetail
           topicId={currentView.topicId}
           currentUserId={String(user.id)}
-          onBack={() => navigate('/admins/forum')}
+          onBack={() => navigate('/admin/forum')}
         />;
       case 'forum-new-topic':
         return <ForumNewTopic
           organizationId={String(user.organizationId || '')}
           currentUserId={String(user.id)}
-          onBack={() => navigate('/admins/forum')}
-          onSubmit={(topicId) => navigate(`/admins/forum/topics/${topicId}`)}
+          onBack={() => navigate('/admin/forum')}
+          onSubmit={(topicId) => navigate(`/admin/forum/topics/${topicId}`)}
         />;
       case 'my-groups':
         return (
           <MyTrainingGroups
-            onGroupClick={(groupId) => navigate(`/admins/my-groups/${groupId}`)}
-            onNavigateToGroup={(groupId) => navigate(`/admins/my-groups/${groupId}`)}
+            onGroupClick={(groupId) => navigate(`/admin/my-groups/${groupId}`)}
+            onNavigateToGroup={(groupId) => navigate(`/admin/my-groups/${groupId}`)}
           />
         );
       case 'my-group':
@@ -193,13 +193,13 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             groupId={currentView.groupId}
             onNavigateToGroups={() => navigate('/')}
             onModuleClick={(moduleId) =>
-              navigate(`/admins/my-groups/${currentView.groupId}/modules/${moduleId}`)
+              navigate(`/admin/my-groups/${currentView.groupId}/modules/${moduleId}`)
             }
             onExamClick={(examId) =>
-              navigate(`/admins/my-exams/${examId}`)
+              navigate(`/admin/my-exams/${examId}`)
             }
             onNavigateToModule={(moduleId) =>
-              navigate(`/admins/my-groups/${currentView.groupId}/modules/${moduleId}`)
+              navigate(`/admin/my-groups/${currentView.groupId}/modules/${moduleId}`)
             }
           />
         );
@@ -209,12 +209,12 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             groupId={currentView.groupId}
             moduleId={currentView.moduleId}
             onNavigateToGroups={() => navigate('/')}
-            onNavigateToGroup={() => navigate(`/admins/my-groups/${currentView.groupId}`)}
+            onNavigateToGroup={() => navigate(`/admin/my-groups/${currentView.groupId}`)}
             onLessonClick={(lessonId) =>
-              navigate(`/admins/my-groups/${currentView.groupId}/modules/${currentView.moduleId}/lessons/${lessonId}`)
+              navigate(`/admin/my-groups/${currentView.groupId}/modules/${currentView.moduleId}/lessons/${lessonId}`)
             }
             onNavigateToLesson={(lessonId) =>
-              navigate(`/admins/my-groups/${currentView.groupId}/modules/${currentView.moduleId}/lessons/${lessonId}`)
+              navigate(`/admin/my-groups/${currentView.groupId}/modules/${currentView.moduleId}/lessons/${lessonId}`)
             }
           />
         );
@@ -225,9 +225,9 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             moduleId={currentView.moduleId}
             lessonId={currentView.lessonId}
             onNavigateToGroups={() => navigate('/')}
-            onNavigateToGroup={() => navigate(`/admins/groups/${currentView.groupId}`)}
+            onNavigateToGroup={() => navigate(`/admin/groups/${currentView.groupId}`)}
             onNavigateToModule={() =>
-              navigate(`/admins/groups/${currentView.groupId}/modules/${currentView.moduleId}`)
+              navigate(`/admin/groups/${currentView.groupId}/modules/${currentView.moduleId}`)
             }
           />
         );
@@ -235,7 +235,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         return (
           <MyExams
             onExamClick={({ assignmentId, groupId, groupName }) =>
-              navigate(`/admins/my-exams/${assignmentId}`)
+              navigate(`/admin/my-exams/${assignmentId}`)
             }
           />
         );
@@ -246,10 +246,10 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             assignmentId={currentView.assignmentId}
             groupName={currentView.groupName}
             onStartAttempt={(examInstanceId: number) => {
-              navigate(`/admins/my-exams/${currentView.assignmentId}/attempt/${examInstanceId}`);
+              navigate(`/admin/my-exams/${currentView.assignmentId}/attempt/${examInstanceId}`);
             }}
             onViewResults={() =>
-              navigate(`/admins/my-results/${currentView.assignmentId}`)
+              navigate(`/admin/my-results/${currentView.assignmentId}`)
             }
           />
         );
@@ -263,12 +263,12 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             }
             examInstanceId={currentView.examInstanceId || currentView.attemptId || 0}
             onComplete={() =>
-              navigate(`/admins/my-exams/${currentView.assignmentId}`)
+              navigate(`/admin/my-exams/${currentView.assignmentId}`)
             }
           />
         );
       case 'my-results':
-        return <MyExamResults userId={String(user.id)} onResultClick={(assignmentId) => navigate(`/admins/my-results/${assignmentId}`)} />;
+        return <MyExamResults userId={String(user.id)} onResultClick={(assignmentId) => navigate(`/admin/my-results/${assignmentId}`)} />;
       case 'my-result-detail':
         return <ExamResultDetail assignmentId={parseInt(currentView.resultId)} />;
       default:
@@ -295,7 +295,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           <button
             onClick={() => {
               setActiveSection('users');
-              navigate('/admins/users');
+              navigate('/admin/users');
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'users' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
@@ -307,7 +307,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           <button
             onClick={() => {
               setActiveSection('groups');
-              navigate('/admins/groups');
+              navigate('/admin/groups');
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'groups' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
@@ -319,7 +319,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           <button
             onClick={() => {
               setActiveSection('results');
-              navigate('/admins/results');
+              navigate('/admin/results');
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'results' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
@@ -331,7 +331,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           <button
             onClick={() => {
               setActiveSection('forum');
-              navigate('/admins/forum');
+              navigate('/admin/forum');
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'forum' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
@@ -346,7 +346,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                 setMyTrainingsExpanded(!myTrainingsExpanded);
                 if (!myTrainingsExpanded) {
                   setActiveSection('my-trainings');
-                  navigate('/admins/my-groups');
+                  navigate('/admin/my-groups');
                 }
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${activeSection === 'my-trainings' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
@@ -369,7 +369,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   onClick={() => {
                     setActiveSection('my-trainings');
                     setCurrentView({ type: 'my-groups' });
-                    navigate('/admins/my-groups');
+                    navigate('/admin/my-groups');
                   }}
                   className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type.startsWith('my-group') || currentView.type.startsWith('my-module') || currentView.type.startsWith('my-lesson')
                     ? 'bg-indigo-50 text-indigo-700'
@@ -384,7 +384,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   onClick={() => {
                     setActiveSection('my-trainings');
                     setCurrentView({ type: 'my-exams' });
-                    navigate('/admins/my-exams');
+                    navigate('/admin/my-exams');
                   }}
                   className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type.startsWith('my-exam')
                     ? 'bg-indigo-50 text-indigo-700'
@@ -399,7 +399,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   onClick={() => {
                     setActiveSection('my-trainings');
                     setCurrentView({ type: 'my-results' });
-                    navigate('/admins/my-results');
+                    navigate('/admin/my-results');
                   }}
                   className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${currentView.type === 'my-results' || currentView.type === 'my-result-detail'
                     ? 'bg-indigo-50 text-indigo-700'
